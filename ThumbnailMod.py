@@ -1,9 +1,13 @@
 from PIL import Image
 import os
 
-thumb_size = (512,512)
+# File contains operations involving creation of thumbnails
 
-def MakeThumbSize(img: Image,thumb_size):
+# ---------------------------------
+# Internal functions
+# ---------------------------------
+# Converts an image to specified dimensions but maintaining aspect ratio. Extra canvas space is filled as black
+def ReduceImageToDimensions(img: Image,thumb_size):
     pix = img.load()
     newImage = Image.new(mode = "RGB", size = thumb_size)
     (oldWidth, oldHeight) = img.size
@@ -13,10 +17,13 @@ def MakeThumbSize(img: Image,thumb_size):
     img = newImage
     return img
 
-
-def MakeThumbSizeCanvasInFolder(thumb_size, base_dir):
+# ---------------------------------
+# External functions
+# ---------------------------------
+# Performs MakeThumbSize operation on all png files in a given folder.
+def ReduceImagesInFolderToDimensions(base_dir, thumb_size):
     for f in os.listdir(base_dir):
         if f.endswith('.png'):
             img = Image.open(base_dir+'/{}'.format(f))
-            img = MakeThumbSize(img, thumb_size)
+            img = ReduceImageToDimensions(img, thumb_size)
             img.save(base_dir+'/{}'.format(f))

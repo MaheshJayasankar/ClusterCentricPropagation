@@ -55,9 +55,9 @@ def ProcessImage(srcimg, fn, dest):
     img_size = srcimg.size
     max_sqr_dist = srcimg.size[0] * srcimg.size[0] + srcimg.size[1] * srcimg.size[1]
 
-    (palList, palModeImg) = PalFinder.getPalColours(srcimg, pal_count)
+    (palModeImg, palList) = PalFinder.ReduceToPalette(srcimg, pal_count)
     palModeImg.save(dest+'/'+fn+'/paletted'+fn+'.png')
-    palImg = PalFinder.MakePalImg(pal_count, palList, pal_img_scale)
+    palImg = PalFinder.MakePalImg(palList, pal_img_scale)
     print(fn+': Image Paletted')
     if not os.path.exists(dest+'/{}/steps'.format(fn)):
         os.makedirs(dest+'/{}/steps'.format(fn))
@@ -148,7 +148,7 @@ for f in os.listdir(baseImgDirectory):
         ProcessImage(i, fn, processedImgDirectory)
         steps_folder = processedImgDirectory+'/{}/steps'.format(fn)
         if should_standardize_size:
-            ThumbnailMod.MakeThumbSizeCanvasInFolder(thumb_size, steps_folder)
+            ThumbnailMod.ReduceImagesInFolderToDimensions(steps_folder, thumb_size)
             print('{}: Step images resolution standardized'.format(fn))
         GifCreator.SaveToGif(fn, processedImgDirectory+'/{}'.format(fn), outputDirectory, extra_gif_frames)
         print('{}: GIF created'.format(fn))

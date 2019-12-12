@@ -4,24 +4,40 @@ import math
 import numpy as np
 import random
 
+# File contains palette operations on images
 
+# ---------------------------------
+# Internal functions
+# ---------------------------------
 
+# Clamps input value between two values
 def clamp(val, minval, maxval):
     if val < minval: return minval
     if val > maxval: return maxval
     return val
 
-def getPalColours(image, no_of_cols):
-    result = image.convert('P', palette=Image.ADAPTIVE, colors = no_of_cols)
+# Custom loss function that takes minimum value 1 when col1 and col2 are equal
+def SqrLoss(col1, col2):
+    return (1/(1+((col1[0] - col2[0])*(col1[0] - col2[0]) + (col1[1] - col2[1])*(col1[1] - col2[1]) + (col1[2] - col2[2])*(col1[2] - col2[2]))))
+
+
+# ---------------------------------
+# External functions
+# ---------------------------------
+# Function returns a paletted version of an image, and a list of palette colours mapped to palette index
+def ReduceToPalette(image, pal_count):
+    result = image.convert('P', palette=Image.ADAPTIVE, colors = pal_count)
     imgPalList = result.getpalette()
     imgPalList = imgPalList[0:pal_count*3]
     palCols = list() 
     for i in range(pal_count):
         palColIter = (imgPalList[3*i],imgPalList[3*i+1], imgPalList[3*i+2])
         palCols.append(palColIter)
-    return (palCols, result)
+    return (result, palCols)
 
-def MakePalImg(pal_count, palList, scale):
+# Function returns an image consiting of palette colours
+def MakePalImg(palList, scale):
+    pal_count = len(palList)
     pal_img_dim = (int)(math.ceil((math.sqrt(pal_count))))
     palImg = Image.new(mode = 'RGB', size = (pal_img_dim, pal_img_dim))
     palPix = palImg.load()
@@ -31,9 +47,7 @@ def MakePalImg(pal_count, palList, scale):
     palImg = palImg.resize(size = (pal_img_dim * scale, pal_img_dim * scale))
     return palImg
 
-def SqrLoss(col1, col2):
-    return (1/(1+((col1[0] - col2[0])*(col1[0] - col2[0]) + (col1[1] - col2[1])*(col1[1] - col2[1]) + (col1[2] - col2[2])*(col1[2] - col2[2]))))
-
+# Finds mean position of a particular colour in an image. Image must be paletted and palette index to colour map must be passed
 def GetMeanOfColInImage(image,palList,col):
     pixMap = image.load()
     (width, height) = image.size
@@ -54,6 +68,7 @@ def GetMeanOfColInImage(image,palList,col):
     meanY = clamp(int(round(totalWeightY / totalCount)),0,image.size[1])
     return (meanX, meanY)
 
+# Draws a square box of specified size of a specific colour and specified middle point on an existing image
 def DrawBox(srcimage, coords, boxSize, color):
     newImage = Image.new(mode = "RGB", size = (boxSize,boxSize), color = color)
     (oldWidth, oldHeight) = srcimage.size
@@ -61,36 +76,3 @@ def DrawBox(srcimage, coords, boxSize, color):
     y1 = (int)((coords[1] - (boxSize / 2)))
     srcimage.paste(newImage, (x1,y1))
     return srcimage
-
-#-----------------------
-#algorithm parameters
-#-----------------------
-
-iter_count = 30000000
-cluster_pull_strength = 25
-cluster_pull_falloff = 3
-use_falloff = True
-pal_count = 16
-seed = 0
-
-#-----------------------
-#debug parameters
-#-----------------------
-
-palImgScale = 8
-iterCheck = 1000000
-
-#-----------------------
-# start of main function
-#-----------------------
-
-
-#--------------------------------
-#controller loop
-#--------------------------------
-
-# for f in os.listdir('baseimages'):
-#     if f.endswith('.png'):
-#         i = Image.open('baseimages/'+f)
-#         fn , fext = os.path.splitext(f)
-#         ProcessImage(i, fn)

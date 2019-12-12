@@ -1,8 +1,12 @@
 from PIL import Image
 import os
 
+# File contains Gif creation and conversion operations
+
+# Hard limit to number of frames that an image can contain
 max_frames = 300
 
+# Looks for a folder named steps in a directory, takes all numbered png files out of directory and mashes them into a gif.
 def SaveToGif(name, src_dir, dest_dir, extra_frames, replace_old = False):
     if os.path.exists(dest_dir+'{}.gif'.format(name)):
         if (not(replace_old)):
